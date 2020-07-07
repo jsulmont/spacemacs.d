@@ -32,7 +32,11 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(osx
+     sql
+     racket
+     javascript
+     yaml
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
@@ -141,21 +145,6 @@ This function should only modify configuration layer settings."
      ;; Code in dotspacemacs/user-init to reduce size of modeline
      theming
 
-     ;; Spacemacs Org mode
-     (org :variables
-          org-enable-github-support t
-          org-enable-bootstrap-support t
-          org-enable-reveal-js-support t
-          org-want-todo-bindings t
-          org-enable-org-journal-support t
-          org-journal-dir "~/projects/journal/"
-          org-journal-file-format "%Y-%m-%d"
-          org-journal-date-prefix "#+TITLE: "
-          org-journal-date-format "%A, %B %d %Y"
-          org-journal-time-prefix "* "
-          org-journal-time-format ""
-          org-journal-carryover-items "TODO=\"TODO\"|TODO=\"DOING\"|TODO=\"BLOCKED\"|TODO=\"REVIEW\"")
-
 
      ;; Text-based file manager with preview
      ;; SPC a r
@@ -192,10 +181,11 @@ This function should only modify configuration layer settings."
 
      ;; Visual file manager - `SPC p t'
      ;; treemacs-no-png-images t removes file and directory icons
-     (treemacs :variables
-               treemacs-indentation 1
-               treemacs-use-filewatch-mode t
-               treemacs-use-follow-mode t)
+     ;; (treemacs :variables
+     ;;           treemacs-indentation 1
+     ;;           treemacs-no-png-images t
+     ;;           treemacs-use-filewatch-mode t
+     ;;           treemacs-use-follow-mode t)
 
      ;; Highlight changes in buffers
      ;; SPC g . transient state for navigating changes
@@ -310,7 +300,7 @@ It should only modify the values of Spacemacs settings."
    ;; with `:variables' keyword (similar to layers). Check the editing styles
    ;; section of the documentation for details on available variables.
    ;; (default 'vim)
-   dotspacemacs-editing-style 'vim
+   dotspacemacs-editing-style 'emacs
 
    ;; If non-nil show the version string in the Spacemacs buffer. It will
    ;; appear as (spacemacs version)@(emacs version)
@@ -342,26 +332,25 @@ It should only modify the values of Spacemacs settings."
    ;; Default major mode for a new empty buffer. Possible values are mode
    ;; names such as `text-mode'; and `nil' to use Fundamental mode.
    ;; (default `text-mode')
-   dotspacemacs-new-empty-buffer-major-mode 'org-mode
+   ;; dotspacemacs-new-empty-buffer-major-mode 'org-mode
 
    ;; Default major mode of the scratch buffer (default `text-mode')
-   dotspacemacs-scratch-mode 'org-mode
+   ;; dotspacemacs-scratch-mode 'org-mode
 
    ;; Initial message in the scratch buffer, such as "Welcome to Spacemacs!"
    ;; (default nil)
-   dotspacemacs-initial-scratch-message "Scratch Buffer in Org-mode"
+   ;; dotspacemacs-initial-scratch-message "Scratch Buffer in Org-mode"
 
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
 
-   dotspacemacs-themes '(doom-gruvbox-light
+   dotspacemacs-themes '(spacemacs-dark
                          doom-solarized-light
                          doom-sourcerer
                          kaolin-valley-dark
                          doom-solarized-dark
-                         spacemacs-light
-                         spacemacs-dark)
+                         spacemacs-light)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -377,10 +366,11 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-colorize-cursor-according-to-state t
 
    ;; Default font or prioritized list of fonts.
-   dotspacemacs-default-font '("Ubuntu Mono"
-                               :size 24.0
-                               :weight normal
-                               :width normal)
+   dotspacemacs-default-font '("Source Code Pro"
+                                :size 13
+                                :weight normal
+                                :width normal
+                                :powerline-scale 1.1)
 
    ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
@@ -481,7 +471,7 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil the frame is maximized when Emacs starts up.
    ;; Takes effect only if `dotspacemacs-fullscreen-at-startup' is nil.
    ;; (default nil) (Emacs 24.4+ only)
-   dotspacemacs-maximized-at-startup t
+   dotspacemacs-maximized-at-startup nil
 
    ;; If non-nil the frame is undecorated when Emacs starts up. Combine this
    ;; variable with `dotspacemacs-maximized-at-startup' in OSX to obtain
@@ -756,9 +746,10 @@ before packages are loaded."
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Safe structural editing
   ;; for all major modes
-  (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hooks)
+  ;; (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hooks)
+
   ;; for clojure layer only (comment out line above)
-  ;; (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
+  (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
   ;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1530,10 +1521,75 @@ before packages are loaded."
   ;;
   ;; end of old-school bindings
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (setq cider-show-error-buffer nil) ;; stack pop only in repl
+  (setq cider-repl-display-help-banner nil)
+  (let ((gls (executable-find "gls")))
+     (when gls
+       (setq insert-directory-program gls
+             dired-listing-switches "-aBhl --group-directories-first")))
 
-
-  )   ;; End of dot-spacemacs/user-config
+  ;;
+  (setq clean-buffer-list-delay-general 1))   ;; End of dot-spacemacs/user-config
 
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
+ '(fci-rule-color "#405A61")
+ '(jdee-db-active-breakpoint-face-colors (cons "#073642" "#268bd2"))
+ '(jdee-db-requested-breakpoint-face-colors (cons "#073642" "#859900"))
+ '(jdee-db-spec-breakpoint-face-colors (cons "#073642" "#56697A"))
+ '(objed-cursor-color "#dc322f")
+ '(package-selected-packages
+   (quote
+    (reveal-in-osx-finder osx-trash osx-dictionary osx-clipboard launchctl auth-source-pass treemacs-evil clj-refactor cljr-helm tide typescript-mode tern nodejs-repl livid-mode skewer-mode js2-refactor multiple-cursors js2-mode js-doc import-js grizzl helm-gtags ggtags dap-mode lsp-treemacs bui lsp-mode dash-functional counsel-gtags counsel swiper ivy add-node-modules-path yaml-mode yasnippet-snippets xterm-color ws-butler writeroom-mode winum which-key web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired toc-org terminal-here tagedit symon symbol-overlay string-inflection spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode restart-emacs ranger rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode prettier-js popwin pcre2el password-generator paradox overseer org-plus-contrib org-bullets open-junk-file nameless multi-term move-text mmm-mode markdown-toc magit-svn magit-section magit-gitflow macrostep lorem-ipsum link-hint kaolin-themes json-navigator json-mode indent-guide impatient-mode hybrid-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-ls-git helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag graphviz-dot-mode google-translate golden-ratio gitignore-templates github-search github-clone gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gist gh-md fuzzy forge font-lock+ flyspell-correct-helm flycheck-pos-tip flycheck-package flycheck-elsa flycheck-clj-kondo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eshell-z eshell-prompt-extras esh-help emr emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dumb-jump dotenv-mode doom-themes diminish diff-hl devdocs define-word csv-mode company-web company-statistics company-quickhelp company-emoji command-log-mode column-enforce-mode color-identifiers-mode clojure-snippets clean-aindent-mode cider-eval-sexp-fu cider centered-cursor-mode browse-at-remote auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adoc-mode ace-link ace-jump-helm-line ac-ispell)))
+ '(rustic-ansi-faces
+   ["#002b36" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#839496"])
+ '(safe-local-variable-values
+   (quote
+    ((cider-clojure-cli-global-options . "-A:dev")
+     (cider-repl-init-code "(dev)")
+     (cider-ns-refresh-after-fn . "dev-extras/resume")
+     (cider-ns-refresh-before-fn . "dev-extras/suspend")
+     (cider-ns-refresh-after-fn . "integrant.repl/resume")
+     (cider-ns-refresh-before-fn . "integrant.repl/suspend")
+     (cider-shadow-cljs-default-options . "app"))))
+ '(vc-annotate-background "#002b36")
+ '(vc-annotate-color-map
+   (list
+    (cons 20 "#859900")
+    (cons 40 "#959300")
+    (cons 60 "#a58e00")
+    (cons 80 "#b58900")
+    (cons 100 "#bc7407")
+    (cons 120 "#c35f0e")
+    (cons 140 "#cb4b16")
+    (cons 160 "#cd4439")
+    (cons 180 "#d03d5d")
+    (cons 200 "#d33682")
+    (cons 220 "#d63466")
+    (cons 240 "#d9334a")
+    (cons 260 "#dc322f")
+    (cons 280 "#ba3f41")
+    (cons 300 "#994d54")
+    (cons 320 "#775b67")
+    (cons 340 "#405A61")
+    (cons 360 "#405A61")))
+ '(vc-annotate-very-old-color nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+)
